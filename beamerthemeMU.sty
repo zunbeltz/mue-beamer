@@ -1,0 +1,324 @@
+%% beamerthemeMU.sty
+%% Tema Beamer para presentaciones de Mondragon Unibertsitatea (Enpresagintza).
+%% Sigue el sistema de diseño MU: plantilla PPT 16:9, paleta de verdes, Duplicate.
+%%
+%% Uso:   \documentclass[aspectratio=169]{beamer}
+%%        \usetheme[brand=enpresagintza,lang=eu]{MU}
+%% Motor: LuaLaTeX o XeLaTeX (Duplicate Sans/Slab). Con pdfLaTeX se usa
+%%        Helvetica como sustituto de Arial.
+%%
+%% Opciones (clave=valor):
+%%   brand        mu | enpresagintza | profesionales | mik   (logotipo; def. mu)
+%%   lang         eu | es | en   (logotipo de facultad; en solo con brand=mik; def. eu)
+%%   palette      mu | eps | huhezi | enpresagintza | prof  (gama de color; def. mu)
+%%   font         sans | slab        (titulares: Sans institucional, Slab actividad; def. sans)
+%%   weight       medium | bold      (medium = académico, bold = no académico; def. medium)
+%%   sectionpages true | false       (diapositiva de sección automática; def. true)
+%%   subsectionpages true | false    (diapositiva de subsección automática; def. false)
+%%
+%% Comandos propios:
+%%   \sectionsubtitle{..}  subtítulo de la próxima \section
+%%   \subsectionsubtitle{..} subtítulo de la próxima \subsection
+%%   \mudestacado[título]{cita}{apoyo}   diapositiva destacada (uso limitado)
+%%   \muclosing{contacto}  contraportada con «Eskerrik asko / Muchas gracias / Thank you»
+%%   \muthankstext{..}     cambia el texto de agradecimiento
+%%   \mufootercenter{..}   texto central del pie (def. Mondragon Unibertsitatea)
+%%   \muassets             carpeta de recursos (def. assets/)
+\ProvidesPackage{beamerthemeMU}[2026/10/28 Tema Beamer Mondragon Unibertsitatea]
+
+\RequirePackage{etoolbox}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage{graphicx}
+\RequirePackage{iftex}
+\RequirePackage{pgfopts}
+
+\providecommand\muassets{assets/}
+
+%% ---------- Opciones ----------
+\def\mu@brand{mu}
+\def\mu@lang{eu}
+\def\mu@palette{mu}
+\def\mu@font{sans}
+\def\mu@weight{medium}
+\def\mu@sectionpages{true}
+\def\mu@subsectionpages{false}
+\pgfkeys{/mu/.cd,
+  brand/.store in=\mu@brand,
+  lang/.store in=\mu@lang,
+  palette/.store in=\mu@palette,
+  font/.store in=\mu@font,
+  weight/.store in=\mu@weight,
+  sectionpages/.store in=\mu@sectionpages,
+  subsectionpages/.store in=\mu@subsectionpages}
+\ProcessPgfOptions{/mu}
+
+%% ---------- Color ----------
+% Neutros y de apoyo comunes
+\definecolor{musecundario}{HTML}{889396}   % texto-secundario
+\definecolor{mucta}{HTML}{FFC72C}          % cta-123
+% Gamas: acento (brillante), oscuro, profundo (fondo de portada), tinte (formas claras)
+\def\mu@setpalette#1#2#3#4{%
+  \definecolor{muaccent}{HTML}{#1}%
+  \definecolor{mudark}{HTML}{#2}%
+  \definecolor{mudeep}{HTML}{#3}%
+  \definecolor{mutint}{HTML}{#4}}
+\ifdefstring{\mu@palette}{mu}{\mu@setpalette{00A3AD}{004851}{053139}{BFE8EB}}{%
+\ifdefstring{\mu@palette}{eps}{\mu@setpalette{ED8B00}{B33D26}{7B2A1A}{F6C580}}{%
+\ifdefstring{\mu@palette}{huhezi}{\mu@setpalette{DA1884}{6C1D45}{4A1230}{ED8CC2}}{%
+\ifdefstring{\mu@palette}{enpresagintza}{\mu@setpalette{509E2F}{275D38}{1B4127}{A8CF97}}{%
+\ifdefstring{\mu@palette}{prof}{\mu@setpalette{D50032}{2C2A29}{2C2A29}{D9D9D9}}{%
+  \PackageError{beamerthemeMU}{Paleta desconocida: \mu@palette}{Usa mu, eps, huhezi, enpresagintza o prof.}}}}}}
+% La tinta de las formas de la portada es siempre un tono claro de la gama
+\def\mu@ganchofile{gancho-\mu@palette}
+
+%% ---------- Tipografía ----------
+\setbeamertemplate{navigation symbols}{}
+\usefonttheme{professionalfonts}
+\ifPDFTeX
+  \RequirePackage[scaled=.92]{helvet}
+  \renewcommand{\familydefault}{\sfdefault}
+  \def\mu@titlefont{\bfseries}
+  \def\mu@heavyfont{\bfseries}
+\else
+  \RequirePackage{fontspec}
+  \IfFileExists{\muassets fonts/DuplicateSans.ttf}{%
+    \setsansfont[Path=\muassets fonts/,
+      UprightFont=DuplicateSans.ttf, BoldFont=DuplicateSans-Bold.ttf,
+      ItalicFont=DuplicateSans-Italic.ttf, BoldItalicFont=DuplicateSans-BoldItalic.ttf]{DuplicateSans.ttf}%
+    \ifdefstring{\mu@font}{slab}{\def\mu@fam{Slab}}{\def\mu@fam{Sans}}%
+    \ifdefstring{\mu@weight}{bold}{\def\mu@wt{Bold}}{\def\mu@wt{Medium}}%
+    \newfontfamily\mu@titlefont[Path=\muassets fonts/]{Duplicate\mu@fam-\mu@wt.ttf}%
+    \newfontfamily\mu@heavyfont[Path=\muassets fonts/]{Duplicate\mu@fam-Bold.ttf}%
+  }{%
+    \PackageWarning{beamerthemeMU}{No se encuentra Duplicate en \muassets fonts/; uso TeX Gyre Heros (similar a Arial)}%
+    \setsansfont{TeX Gyre Heros}%
+    \let\mu@titlefont\bfseries
+    \let\mu@heavyfont\bfseries
+  }
+  \renewcommand{\familydefault}{\sfdefault}
+\fi
+
+%% ---------- Colores de Beamer ----------
+\setbeamercolor{normal text}{fg=mudark,bg=white}
+\setbeamercolor{structure}{fg=muaccent}
+\setbeamercolor{frametitle}{fg=muaccent}
+\setbeamercolor{alerted text}{fg=mudark}
+\setbeamercolor{footline}{fg=muaccent}
+\setbeamercolor{itemize item}{fg=muaccent}
+\setbeamercolor{itemize subitem}{fg=mudark}
+\setbeamercolor{enumerate item}{fg=muaccent}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{block title}{fg=mudark,bg=mutint}
+\setbeamercolor{block body}{fg=mudark,bg=mutint!30!white}
+\setbeamercolor{block title alerted}{fg=mudark,bg=mucta}
+\setbeamercolor{block body alerted}{fg=mudark,bg=mucta!20!white}
+\setbeamercolor{block title example}{fg=white,bg=mudark}
+\setbeamercolor{block body example}{fg=mudark,bg=mutint!30!white}
+\setbeamercolor{caption name}{fg=muaccent}
+\setbeamercolor{bibliography entry author}{fg=mudark}
+\setbeamercolor{bibliography entry title}{fg=mudark}
+\setbeamercolor{bibliography entry note}{fg=musecundario}
+
+\setbeamerfont{frametitle}{series=\mdseries,size=\fontsize{20}{22}\selectfont}
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamerfont{alerted text}{series=\bfseries}
+\setbeamerfont{caption}{size=\small}
+\setbeamerfont{footnote}{size=\tiny}
+
+\setbeamertemplate{itemize item}{\raisebox{.1ex}{\scriptsize$\bullet$}}
+\setbeamertemplate{itemize subitem}{\raisebox{.32ex}{\rule{.55em}{.6pt}}}
+\setbeamertemplate{itemize subsubitem}{\raisebox{.1ex}{\tiny$\bullet$}}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+\setbeamertemplate{enumerate subitem}{\insertenumlabel.\insertsubenumlabel}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{bibliography item}[text]
+\setbeamertemplate{section in toc}{\color{muaccent}\inserttocsectionnumber.~\color{mudark}\inserttocsection}
+\setbeamertemplate{subsection in toc}{\hspace{1.2em}\color{mudark}\inserttocsubsection}
+
+%% ---------- Geometría ----------
+\setkeys{beamerframe}{t}% contenido arriba por defecto (como la plantilla PPT)
+\setbeamersize{text margin left=6.9mm,text margin right=6.9mm}
+\tikzset{mupage/.style={remember picture,overlay,
+  shift={(current page.north west)},x=.01\paperwidth,y=-.01\paperheight}}
+
+%% ---------- Logotipos ----------
+\newif\ifmu@mik
+\def\mu@miklang{gaztelera}
+\ifdefstring{\mu@lang}{eu}{\def\mu@miklang{euskara}}{}
+\ifdefstring{\mu@lang}{en}{\def\mu@miklang{ingelesa}}{}
+\ifdefstring{\mu@brand}{mik}{\mu@miktrue}{}
+\ifdefstring{\mu@brand}{enpresagintza}{%
+  \def\mu@logopos{\muassets logos/enpresagintza-vertical-positivo-\mu@lang.png}%
+  \def\mu@logoneg{\muassets logos/enpresagintza-vertical-negativo-eu.png}%
+  \def\mu@logow{.085}\def\mu@logowtitle{.11}}{%
+\ifdefstring{\mu@brand}{profesionales}{%
+  \def\mu@logopos{\muassets logos/profesionales-vertical-positivo-eu.png}%
+  \def\mu@logoneg{\muassets logos/profesionales-vertical-negativo-eu.png}%
+  \def\mu@logow{.085}\def\mu@logowtitle{.11}}{%
+  \def\mu@logopos{\muassets logos/mu-positivo.png}%
+  \def\mu@logoneg{\muassets logos/mu-negativo.png}%
+  \def\mu@logow{.095}\def\mu@logowtitle{.13}}}
+
+% Endoso fuerte MIK (MU + facultad + MIK en un solo logotipo)
+% \mu@mikneg: logotipo en blanco sin cápsula, para fondos oscuros
+% \mu@mikcolor{ancla}{x}{y}: logotipo a color sin cápsula, para fondo blanco
+\def\mu@mikcolor#1#2#3{\node[anchor=#1,inner sep=0] at (#2,#3)
+  {\includegraphics[width=.30\paperwidth]{\muassets logos/mik/mik-\mu@miklang-horizontal-transparente.png}};}
+\def\mu@mikneg#1#2#3{\node[anchor=#1,inner sep=0] at (#2,#3)
+  {\includegraphics[width=.30\paperwidth]{\muassets logos/mik/mik-\mu@miklang-horizontal-negativo.png}};}
+% Altura y posición del título
+\def\mu@titley{10.5}
+\def\mu@headh{19mm}
+\def\mu@titlew{.72}
+\ifmu@mik\def\mu@titlew{.60}\fi
+
+%% ---------- Estilo de cada diapositiva ----------
+% light | dark | title | section | closing; se fija dentro del marco y se lee al componer el fondo
+\def\mu@style{light}
+\AtBeginEnvironment{frame}{\gdef\mu@style{light}}
+
+\def\mu@border{\draw[line width=.9pt,mutint] (.3,.5) rectangle (99.7,99.5);}
+
+\def\mu@bg@light{%
+  \mu@border
+  \ifmu@mik\mu@mikcolor{north east}{97}{3.2}\else
+  \node[anchor=north east,inner sep=0] at (97,3.8)
+    {\includegraphics[width=\mu@logow\paperwidth]{\mu@logopos}};\fi}
+\def\mu@bg@dark{%
+  \fill[mudark] (0,0) rectangle (100,100);
+  \ifmu@mik\mu@mikneg{north east}{97}{3.2}\else
+  \node[anchor=north east,inner sep=0] at (97,3.8)
+    {\includegraphics[width=\mu@logow\paperwidth]{\mu@logoneg}};\fi}
+\def\mu@bg@title{%
+  \fill[mudeep] (0,0) rectangle (100,100);
+  \node[anchor=north west,inner sep=0] at (.6,68.7)
+    {\includegraphics[width=.412\paperwidth,height=.332\paperheight]{\muassets formas/portada-tinte-\mu@palette.png}};
+  \node[anchor=north west,inner sep=0] at (0,8.9)
+    {\includegraphics[width=1.073\paperwidth,height=1.24\paperheight]{\muassets formas/portada-forma-\mu@palette.png}};
+  \ifmu@mik\mu@mikneg{north east}{97}{3.2}\else
+  \node[anchor=north west,inner sep=0] at (3.2,5.2)
+    {\includegraphics[width=\mu@logowtitle\paperwidth]{\mu@logoneg}};\fi}
+\def\mu@bg@section{}
+\def\mu@bg@closing{%
+  \fill[mudeep] (0,0) rectangle (100,100);
+  \ifmu@mik\mu@mikneg{north east}{97}{3.2}\else
+  \node[anchor=north west,inner sep=0] at (0,0)
+    {\includegraphics[width=.15\paperwidth,height=.264\paperheight]{\muassets formas/cierre-forma.png}};
+  \node[anchor=north west,inner sep=0] at (1.9,3.3)
+    {\includegraphics[width=\mu@logow\paperwidth]{\mu@logopos}};\fi}
+
+\setbeamertemplate{background}{%
+  \begin{tikzpicture}[mupage]
+    \clip (0,0) rectangle (100,100);
+    \csname mu@bg@\mu@style\endcsname
+  \end{tikzpicture}}
+\setbeamertemplate{background canvas}{}
+
+%% ---------- Título de transparencia, cabecera y pie ----------
+\setbeamertemplate{headline}{\leavevmode\vbox to \mu@headh{\vss}}
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{tikzpicture}[mupage]
+    \node[anchor=west,inner sep=0,text width=\mu@titlew\paperwidth,align=left]
+      at (4.3,\mu@titley) {\hyphenpenalty=10000 \usebeamerfont{frametitle}\mu@titlefont\usebeamercolor[fg]{frametitle}\insertframetitle};
+  \end{tikzpicture}\par}
+
+\def\mu@footercenter{Mondragon Unibertsitatea}
+\newcommand\mufootercenter[1]{\def\mu@footercenter{#1}}
+\setbeamertemplate{footline}{%
+  \leavevmode\vbox to 9.5mm{\vss
+    \hbox to \paperwidth{\hskip 6.9mm
+      \hbox to \dimexpr\paperwidth-13.8mm\relax{%
+        \usebeamercolor[fg]{footline}\fontsize{8}{9}\selectfont
+        \hbox to 0pt{\insertshortdate\hss}\hfil\mu@footercenter\hfil
+        \hbox to 0pt{\hss\insertframenumber}}%
+      \hskip 6.9mm}%
+    \vss}}
+
+%% ---------- Portada ----------
+\setbeamertemplate{title page}{%
+  \gdef\mu@style{title}%
+  \begin{tikzpicture}[mupage]
+    \node[anchor=south west,inner sep=0,text width=.48\paperwidth,align=left] at (35.6,59.3)
+      {\hyphenpenalty=10000 \exhyphenpenalty=10000 \mu@titlefont\fontsize{20}{24}\selectfont\color{white}\inserttitle\par};
+    \node[anchor=north west,inner sep=0,text width=.48\paperwidth,align=left] at (35.6,60.8)
+      {\hyphenpenalty=10000 \exhyphenpenalty=10000
+       \ifx\insertsubtitle\@empty\else
+         {\fontsize{12}{15}\selectfont\color{mudeep}\insertsubtitle\par}\vskip 3mm\fi
+       {\fontsize{10}{13}\selectfont\color{mudeep}%
+         \insertauthor\ifx\insertdate\@empty\else\\\insertdate\fi\par}};
+  \end{tikzpicture}}
+
+%% ---------- Secciones y subsecciones (como la plantilla PPT) ----------
+% Forma diagonal grande arriba a la izquierda, forma oscura con el número detrás,
+% título a la derecha del número y subtítulo debajo. Posiciones de la plantilla.
+\def\mu@secsub{}
+\newcommand\sectionsubtitle[1]{\gdef\mu@secsub{#1}}
+\def\mu@subsecsub{}
+\newcommand\subsectionsubtitle[1]{\gdef\mu@subsecsub{#1}}
+% #1 forma (seccion|subseccion)  #2 número  #3 título  #4 color del título
+% #5 color del subtítulo  #6 subtítulo
+\newcommand\mu@sectionslide[6]{%
+  \begin{frame}[plain]
+    \gdef\mu@style{section}%
+    \begin{tikzpicture}[mupage]
+      \clip (0,0) rectangle (100,100);
+      \node[anchor=north west,inner sep=0] at (0,0)
+        {\includegraphics[width=.573\paperwidth]{\muassets formas/#1-\mu@palette.png}};
+      \node[anchor=north west,inner sep=0] at (0,13.6)
+        {\includegraphics[width=.152\paperwidth]{\muassets formas/numero-\mu@palette.png}};
+      \node[inner sep=0,text=white] at (7,46)
+        {\mu@heavyfont\fontsize{17}{20}\selectfont #2};
+      \node[anchor=south west,inner sep=0,text=#4,text width=.27\paperwidth,align=left]
+        at (19.6,58.8)
+        {\hyphenpenalty=10000 \mu@heavyfont\fontsize{16}{19}\selectfont #3\par};
+      \node[anchor=north west,inner sep=0,text=#5,text width=.27\paperwidth,align=left]
+        at (19.6,62)
+        {\normalfont\sffamily\fontsize{10}{13}\selectfont #6\par};
+      \ifmu@mik\mu@mikcolor{north east}{97}{3.2}\fi
+    \end{tikzpicture}
+  \end{frame}}
+\newcommand\musectionframe{%
+  \mu@sectionslide{seccion}{\insertsectionnumber}{\insertsection}{mudark}{white}{\mu@secsub}%
+  \gdef\mu@secsub{}}
+\newcommand\musubsectionframe{%
+  \mu@sectionslide{subseccion}{\insertsectionnumber.\insertsubsectionnumber}{\insertsubsection}{mudark}{muaccent}{\mu@subsecsub}%
+  \gdef\mu@subsecsub{}}
+\AtBeginSection[]{\ifdefstring{\mu@sectionpages}{true}{\musectionframe}{}}
+\AtBeginSubsection[]{\ifdefstring{\mu@subsectionpages}{true}{\musubsectionframe}{}}
+
+%% ---------- Diapositiva destacada ----------
+\def\mu@darkcolors{%
+  \setbeamercolor{normal text}{fg=white,bg=mudark}%
+  \setbeamercolor{frametitle}{fg=white}%
+  \setbeamercolor{footline}{fg=white}%
+  \setbeamercolor{structure}{fg=white}%
+  \setbeamercolor{alerted text}{fg=mucta}%
+  \usebeamercolor[fg]{normal text}}
+\newcommand\mudestacado[3][]{%
+  {\mu@darkcolors
+  \begin{frame}{#1}
+    \gdef\mu@style{dark}%
+    \vspace{2mm}
+    {\bfseries\fontsize{20}{26}\selectfont #2\par}
+    \vspace{4mm}
+    {\fontsize{12}{16}\selectfont #3\par}
+  \end{frame}}}
+
+%% ---------- Contraportada ----------
+\def\mu@thanks{Eskerrik asko\\Muchas gracias\\Thank you}
+\newcommand\muthankstext[1]{\def\mu@thanks{#1}}
+\newcommand\muclosing[1]{%
+  \begin{frame}[plain]
+    \gdef\mu@style{closing}%
+    \begin{tikzpicture}[mupage]
+      \node[inner sep=0,text=white,align=center,font=\bfseries\fontsize{20}{27}\selectfont] at (49.75,47.5)
+        {\mu@thanks};
+      \node[anchor=north west,inner sep=0,text=white,align=left,text width=.27\paperwidth,font=\fontsize{7.5}{10}\selectfont] at (71.5,69.8)
+        {#1};
+    \end{tikzpicture}
+  \end{frame}}
+
+\endinput
