@@ -39,6 +39,6 @@ Mira `ejemplo.tex`. Coloca `beamerthemeMU.sty` y `assets/` junto al documento (o
 `font` y `weight` aplican la matriz académico/institucional del libro de marca a los titulares.
 **`brand=mik`** (endoso fuerte MU + facultad + MIK): el logotipo conjunto va a color arriba a la derecha en las transparencias, también arriba a la derecha en secciones y subsecciones, y en blanco (sin cápsula) arriba a la derecha sobre fondos oscuros (portada, destacado, contraportada). Úsalo en investigación, transferencia y proyectos de formación in company; no en formación reglada ni Formación Continua abierta. Ejemplo: `ejemplo-mik.tex`. Los logos transparentes (`-transparente`, a color) y en blanco (`-negativo`) de todas las variantes están en `assets/logos/mik/`.
 
-`\mufootercenter{..}` cambia el texto central del pie y `\muthankstext{..}` el agradecimiento.
+`\mufootercenter{..}` cambia el texto central del pie (por defecto «Mondragon Unibertsitatea», o «MIK S. Coop.» con `brand=mik`) y `\muthankstext{..}` el agradecimiento (por defecto solo la frase del idioma `lang`: «Eskerrik asko», «Muchas gracias» o «Thank you»; para las tres, `\muthankstext{Eskerrik asko\\Muchas gracias\\Thank you}`).
 
 Los recursos de `assets/` salen de `MU-sistema-diseno`. Duplicate tiene licencia de la universidad: no distribuyas la carpeta `fonts` fuera de MU sin confirmarlo con Comunicación.

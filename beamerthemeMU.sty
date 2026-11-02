@@ -20,9 +20,9 @@
 %%   \sectionsubtitle{..}  subtítulo de la próxima \section
 %%   \subsectionsubtitle{..} subtítulo de la próxima \subsection
 %%   \mudestacado[título]{cita}{apoyo}   diapositiva destacada (uso limitado)
-%%   \muclosing{contacto}  contraportada con «Eskerrik asko / Muchas gracias / Thank you»
+%%   \muclosing{contacto}  contraportada con el agradecimiento en el idioma de lang
 %%   \muthankstext{..}     cambia el texto de agradecimiento
-%%   \mufootercenter{..}   texto central del pie (def. Mondragon Unibertsitatea)
+%%   \mufootercenter{..}   texto central del pie (def. Mondragon Unibertsitatea; MIK S. Coop. con brand=mik)
 %%   \muassets             carpeta de recursos (def. assets/)
 \ProvidesPackage{beamerthemeMU}[2026/10/28 Tema Beamer Mondragon Unibertsitatea]
 
@@ -226,6 +226,7 @@
   \end{tikzpicture}\par}
 
 \def\mu@footercenter{Mondragon Unibertsitatea}
+\ifmu@mik\def\mu@footercenter{MIK S. Coop.}\fi
 \newcommand\mufootercenter[1]{\def\mu@footercenter{#1}}
 \setbeamertemplate{footline}{%
   \leavevmode\vbox to 9.5mm{\vss
@@ -308,7 +309,9 @@
   \end{frame}}}
 
 %% ---------- Contraportada ----------
-\def\mu@thanks{Eskerrik asko\\Muchas gracias\\Thank you}
+\def\mu@thanks{Eskerrik asko}
+\ifdefstring{\mu@lang}{es}{\def\mu@thanks{Muchas gracias}}{}
+\ifdefstring{\mu@lang}{en}{\def\mu@thanks{Thank you}}{}
 \newcommand\muthankstext[1]{\def\mu@thanks{#1}}
 \newcommand\muclosing[1]{%
   \begin{frame}[plain]
