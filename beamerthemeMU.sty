@@ -177,7 +177,8 @@
 %% ---------- Estilo de cada diapositiva ----------
 % light | dark | title | section | closing; se fija dentro del marco y se lee al componer el fondo
 \def\mu@style{light}
-\AtBeginEnvironment{frame}{\gdef\mu@style{light}}
+\gdef\mu@bgforms{}
+\AtBeginEnvironment{frame}{\gdef\mu@style{light}\gdef\mu@bgforms{}}
 
 \def\mu@border{\draw[line width=.9pt,mutint] (.3,.5) rectangle (99.7,99.5);}
 
@@ -213,6 +214,7 @@
   \begin{tikzpicture}[mupage]
     \clip (0,0) rectangle (100,100);
     \csname mu@bg@\mu@style\endcsname
+    \mu@bgforms
   \end{tikzpicture}}
 \setbeamertemplate{background canvas}{}
 
@@ -289,6 +291,52 @@
   \gdef\mu@subsecsub{}}
 \AtBeginSection[]{\ifdefstring{\mu@sectionpages}{true}{\musectionframe}{}}
 \AtBeginSubsection[]{\ifdefstring{\mu@subsectionpages}{true}{\musubsectionframe}{}}
+
+%% ---------- Formas de la marca ----------
+% \muforma[opciones]{forma}     dibuja la forma donde se llama (queda sobre lo anterior,
+%                               así que llámala antes del texto para que quede detrás)
+% \muformabg[opciones]{forma}   la dibuja en el fondo de la diapositiva actual,
+%                               siempre detrás del contenido, se llame donde se llame
+% forma:   circulo | arco | cuenco | barra | gancho | corte
+% Opciones (posición y tamaño en % de la página, con el origen arriba a la izquierda):
+%   x, y        posición del punto de anclaje              (def. 50, 50)
+%   w           ancho                                      (def. 20)
+%   anchor      ancla del dibujo: center, north west, ...  (def. center)
+%   color       accent | dark | deep | tint | cta | white  (def. accent; sigue la paleta)
+%   rot         giro en grados, sentido antihorario        (def. 0)
+%   flip        true espeja horizontalmente                (def. false)
+%   opacity     0..1                                       (def. 1)
+\pgfkeys{/mu/forma/.cd,
+  x/.store in=\muf@x, y/.store in=\muf@y, w/.store in=\muf@w,
+  anchor/.store in=\muf@anchor, color/.store in=\muf@color,
+  rot/.store in=\muf@rot, opacity/.store in=\muf@opacity,
+  flip/.is choice, flip/true/.code={\def\muf@flip{1}}, flip/false/.code={\def\muf@flip{0}},
+  flip/.default=true}
+\def\mu@formdefaults{\def\muf@x{50}\def\muf@y{50}\def\muf@w{20}\def\muf@anchor{center}%
+  \def\muf@color{accent}\def\muf@rot{0}\def\muf@opacity{1}\def\muf@flip{0}}
+% Dibuja un nodo: x y ancho ancla giro opacidad espejo archivo
+\def\mu@drawform#1#2#3#4#5#6#7#8{%
+  \pgfmathsetlength\mu@fw{#3*\paperwidth/100}%
+  \node[anchor=#4,inner sep=0,rotate=#5,opacity=#6] at (#1,#2)
+    {\ifnum#7=1\reflectbox{\includegraphics[width=\mu@fw]{\muassets formas/#8}}%
+     \else\includegraphics[width=\mu@fw]{\muassets formas/#8}\fi};}
+\newdimen\mu@fw
+\def\mu@parseform#1#2{\mu@formdefaults\pgfkeys{/mu/forma/.cd,#1}%
+  \edef\muf@file{f-#2-\muf@color-\mu@palette.png}%
+  \ifdefstring{\muf@color}{cta}{\edef\muf@file{f-#2-cta.png}}{}%
+  \ifdefstring{\muf@color}{white}{\edef\muf@file{f-#2-white.png}}{}%
+  \edef\mu@formcall{\noexpand\mu@drawform{\muf@x}{\muf@y}{\muf@w}{\muf@anchor}{\muf@rot}{\muf@opacity}{\muf@flip}%
+    {\muf@file}}}
+\newcommand\muforma[2][]{%
+  \begingroup\mu@parseform{#1}{#2}%
+  \ifvmode\nointerlineskip\fi
+  \hbox to 0pt{\begin{tikzpicture}[mupage]\mu@formcall\end{tikzpicture}\hss}%
+  \ifvmode\nointerlineskip\fi
+  \endgroup}
+\newcommand\muformabg[2][]{%
+  \begingroup\mu@parseform{#1}{#2}%
+  \expandafter\expandafter\expandafter\gdef\expandafter\expandafter\expandafter\mu@bgforms\expandafter\expandafter\expandafter{\expandafter\mu@bgforms\mu@formcall}%
+  \endgroup}
 
 %% ---------- Diapositiva destacada ----------
 \def\mu@darkcolors{%

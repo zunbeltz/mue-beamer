@@ -41,4 +41,27 @@ Mira `ejemplo.tex`. Coloca `beamerthemeMU.sty` y `assets/` junto al documento (o
 
 `\mufootercenter{..}` cambia el texto central del pie (por defecto «Mondragon Unibertsitatea», o «MIK S. Coop.» con `brand=mik`) y `\muthankstext{..}` el agradecimiento (por defecto solo la frase del idioma `lang`: «Eskerrik asko», «Muchas gracias» o «Thank you»; para las tres, `\muthankstext{Eskerrik asko\\Muchas gracias\\Thank you}`).
 
+## Formas de la marca
+
+`\muforma[opciones]{forma}` dibuja una forma en la diapositiva, `\muformabg[opciones]{forma}` la pone en el fondo (siempre detrás del texto, se llame donde se llame). Con `\muforma` llámala antes del texto si quieres que quede detrás.
+
+Formas: `circulo`, `arco`, `cuenco`, `barra`, `gancho`, `corte`. Posición y tamaño en % de la página, con el origen arriba a la izquierda.
+
+| Opción | Valores | Por defecto |
+|---|---|---|
+| `x`, `y` | posición del punto de anclaje | `50`, `50` |
+| `w` | ancho | `20` |
+| `anchor` | ancla del dibujo (`center`, `north west`, `south east`...) | `center` |
+| `color` | `accent`, `dark`, `deep`, `tint` (siguen la `palette`), `cta`, `white` | `accent` |
+| `rot` | giro en grados, antihorario | `0` |
+| `flip` | espeja horizontalmente | `false` |
+| `opacity` | `0`..`1` | `1` |
+
+```latex
+\muformabg[color=tint,x=100,y=100,w=30,anchor=south east]{gancho}
+\muforma[color=cta,x=88,y=30,w=5]{circulo}
+```
+
+Los PNG salen de `MU-sistema-diseno/formas` (círculo, arco, cuenco y barra corporativos, gancho 7467 y corte45 7467), recoloreados con los colores de cada paleta: `assets/formas/f-<forma>-<color>-<paleta>.png`.
+
 Los recursos de `assets/` salen de `MU-sistema-diseno`. Duplicate tiene licencia de la universidad: no distribuyas la carpeta `fonts` fuera de MU sin confirmarlo con Comunicación.
